@@ -15,18 +15,18 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.mujoco/mujoco210/bin:/usr/lib/nvi
 export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so
 
 # Begin experiment
-for SEED in {1..10}
-do
-    python3 main.py \
-    --seed $SEED \
-    --config "ipd.yaml" \
-    --opponent-shaping \
-    --prefix ""
+python3 main.py \
+--seed 42 \
+--config "ipd.yaml" \
+--opponent-shaping \
+--prefix "" \
+"$@"
 
-    python3 main.py \
-    --seed $SEED \
-    --config "ipd.yaml" \
-    --opponent-shaping \
-    --test-mode \
-    --prefix "test"
-done
+python3 main.py \
+--seed 42 \
+--config "ipd.yaml" \
+--opponent-shaping \
+--test-mode \
+--prefix "test" \
+"$@"
+

@@ -22,10 +22,10 @@ class Peer(Base):
         self._set_policy()
 
     def _set_policy(self):
-        # For repeated matrix game experiments, we consider tabular representation for 
+        # For repeated matrix game experiments, we consider tabular representation for
         # the opponent's policy, which will be directly set when set_persona() is called.
         # Thus, returning instead of setting policy
-        if self.args.env_name == "IPD-v0" or self.args.env_name == "RPS-v0":
+        if self.args.env_name == "IPD-v0" or self.args.env_name == "RPS-v0" or self.args.env_name.startswith("CCF-PD"):
             self.is_tabular_policy = True
         else:
             if self.is_discrete_action:
@@ -39,7 +39,7 @@ class Peer(Base):
             self.log[self.args.log_name].info("[{}] {}".format(self.name, self.actor))
 
     def set_persona(self, persona):
-        if self.args.env_name == "IPD-v0" or self.args.env_name == "RPS-v0":
+        if self.args.env_name == "IPD-v0" or self.args.env_name == "RPS-v0" or self.args.env_name.startswith("CCF-PD"):
             self.log[self.args.log_name].info("[{}] Set persona: {}".format(self.name, persona))
             self.actor = torch.nn.Parameter(torch.from_numpy(persona).float(), requires_grad=True)
         else:

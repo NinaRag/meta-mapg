@@ -5,6 +5,13 @@ from gym_env.multiprocessing_env import SubprocVecEnv
 
 
 register(
+    id='CCF-PD-v0',
+    entry_point='gym_env.ccf.ccf_pd_env:CCFPdEnv',
+    kwargs={'args': None},
+    max_episode_steps=150
+)
+
+register(
     id='IPD-v0',
     entry_point='gym_env.ipd.ipd_env:IPDEnv',
     kwargs={'args': None},

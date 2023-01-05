@@ -34,7 +34,7 @@ def meta_train(shared_meta_agent, process_dict, rank, log, args):
     peer = Peer(log, tb_writer, args, name="peer", i_agent=1, rank=rank)
 
     # Set agents
-    agents = [meta_agent, peer] 
+    agents = [meta_agent, peer]
 
     while True:
         # Sync thread-specific meta-agent with shared meta-agent
@@ -44,12 +44,16 @@ def meta_train(shared_meta_agent, process_dict, rank, log, args):
         persona = env.sample_personas(is_train=True)[0]
         peer.set_persona(persona)
 
-        # Accumulate actor and value losses for outer-loop optimization 
+        # Accumulate actor and value losses for outer-loop optimization
         # through processing until the end of Markov chain
         actor_losses, value_losses = [], []
         actors = [agent.actor for agent in agents]
         memories = []
 
+        # Note: Does not include outer for each phi_o -i loop
+        # because there is only one peer
+
+        # Pseudocode: Line 5
         for i_joint in range(args.chain_horizon + 1):
             iteration = train_iteration * (args.chain_horizon + 1) + i_joint
 
@@ -60,6 +64,7 @@ def meta_train(shared_meta_agent, process_dict, rank, log, args):
 
             # Perform inner-loop update
             phis = []
+            # Pseudo code: Line 7
             for agent, actor in zip(agents, actors):
                 phi = agent.inner_update(actor, memory, i_joint, is_train=True)
                 phis.append(phi)
