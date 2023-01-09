@@ -35,24 +35,32 @@ class CCFPdEnv(gym.Env):
         self.states = np.arange(start=1, stop=10, step=1, dtype=np.int32)
         self.action_space = Tuple([Discrete(3) for _ in range(2)])
 
+        if args.render_env:
+            # Record the occurrences of outcomes so that we can render
+            # a distribution at the end of each episode
+            self.state_count = np.zeros((3, 3))
+
     def reset(self):
         obs = np.zeros(self.args.traj_batch_size, dtype=np.int32)
         obs = to_onehot(obs, dim=10)
         return obs
 
     def step(self, actions):
-        state = self._action_to_state(actions)
-        assert len(state.shape) == 1, "Shape should be (traj_batch_size,)"
+        state_index = self._action_to_state(actions)
+        assert len(state_index.shape) == 1, "Shape should be (traj_batch_size,)"
+
+        if self.args.render_env:
+            self.state_count[actions[0], actions[1]] += 1
 
         # Get observation
-        obs = self.states[state]
+        obs = self.states[state_index]
         obs = to_onehot(obs, dim=10)
 
         # Get reward
         rewards = []
         for i_agent in range(2):
             agent_i_matrix = self.payoff_matrix[:, :, i_agent].reshape(-1)
-            rewards.append(agent_i_matrix[state])
+            rewards.append(agent_i_matrix[state_index])
 
         # Get done
         done = False
@@ -60,7 +68,15 @@ class CCFPdEnv(gym.Env):
         return obs, rewards, done, {}
 
     def render(self, mode='human', close=False):
-        raise NotImplementedError()
+        if self.args.render_env:
+            normalized = self.state_count / self.state_count.sum()
+            print("Payoff matrix occurence distribution:")
+            print(normalized)
+
+    def render_to_tensorboard(self, tb_writer):
+        if self.args.render_env:
+            normalized = self.state_count / self.state_count.sum()
+            # todo: add to tensorboard
 
     def _action_to_state(self, actions):
         assert actions[0].shape == actions[1].shape

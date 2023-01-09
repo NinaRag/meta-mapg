@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import torch
 import numpy as np
 from meta.base import Base
@@ -19,6 +21,7 @@ class MetaAgent(Base):
         i_agent (int): Agent index among the agents in the shared environment
         rank (int): Used for thread-specific meta-agent for multiprocessing. Default: -1
     """
+
     def __init__(self, log, tb_writer, args, name, i_agent, rank=-1):
         super(MetaAgent, self).__init__(log, tb_writer, args, name, i_agent, rank)
 
@@ -55,12 +58,12 @@ class MetaAgent(Base):
         self.dynamic_lr.share_memory_()
         self.dynamic_lr_optimizer = SharedAdam(
             get_parameters(self.dynamic_lr), lr=self.args.actor_lr_outer, amsgrad=True)
-        self.dynamic_lr_optimizer.share_memory() 
+        self.dynamic_lr_optimizer.share_memory()
 
         self.value.share_memory()
         self.value_optimizer = SharedAdam(
             get_parameters(self.value), lr=self.args.value_lr, amsgrad=True)
-        self.value_optimizer.share_memory() 
+        self.value_optimizer.share_memory()
 
     def sync(self, shared_meta_agent):
         assert shared_meta_agent.rank == -1, "Shared meta-agent's rank must be -1 (i.e., non-thread)"
@@ -68,6 +71,15 @@ class MetaAgent(Base):
         self.actor.load_state_dict(shared_meta_agent.actor.state_dict())
         self.dynamic_lr.data = shared_meta_agent.dynamic_lr.data
         self.value.load_state_dict(shared_meta_agent.value.state_dict())
+
+    def copy(self, meta_agent):
+        state_dict = OrderedDict(
+            (k.replace(meta_agent.name, self.name), v) for k, v in meta_agent.actor.state_dict().items())
+        self.actor.load_state_dict(state_dict)
+        self.dynamic_lr.data = meta_agent.dynamic_lr.data
+        value_dict = OrderedDict(
+            (k.replace(meta_agent.name, self.name), v) for k, v in meta_agent.value.state_dict().items())
+        self.value.load_state_dict(value_dict)
 
     def _get_outer_actor_loss(self, memories, iteration):
         # Get advantage

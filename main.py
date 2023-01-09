@@ -109,6 +109,9 @@ if __name__ == "__main__":
         "--test-mode", action="store_true",
         help="If True, perform meta-test instead of meta-train")
     parser.add_argument(
+        "--self-play", action="store_true",
+        help="If True, perform meta-test using self-play")
+    parser.add_argument(
         "--max-train-iteration", type=int, default=1e5,
         help="Terminate program when max train iteration is reached")
 
@@ -122,6 +125,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--n-agent", type=int, default=2,
         help="Number of agents in a shared environment")
+    parser.add_argument(
+        "--render-env", action="store_true",
+        help="Whether or not to render the environment periodically,")
 
     # Misc
     parser.add_argument(

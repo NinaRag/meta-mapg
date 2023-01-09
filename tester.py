@@ -1,4 +1,6 @@
 import torch
+
+from meta.meta_agent import MetaAgent
 from meta.peer import Peer
 from misc.rl_utils import collect_trajectory
 from misc.utils import log_performance
@@ -23,18 +25,25 @@ def meta_test(meta_agent, log, tb_writer, args):
     peer = Peer(log, tb_writer, args, name="peer", i_agent=1)
 
     # Set agents
-    agents = [meta_agent, peer] 
+    if args.self_play:
+        meta_agent_2 = MetaAgent(log, tb_writer, args, name="meta-agent", i_agent=1)
+        meta_agent_2.copy(meta_agent)
+        agents = [meta_agent, meta_agent_2]
+    else:
+        agents = [meta_agent, peer]
 
     # Get meta-test persona
     personas = env.sample_personas(is_train=False, is_val=False)
 
-    for i_persona, persona in enumerate(personas): 
+    for i_persona, persona in enumerate(personas):
         peer.set_persona(persona)
         actors = [agent.actor for agent in agents]
 
         for i_joint in range(args.chain_horizon + 1):
             # Collect trajectory
             memory, scores = collect_trajectory(agents, actors, env, args)
+            if args.render_env:
+                env.render()
             log_performance(scores, log, tb_writer, args, i_joint, test_iteration, 0, is_train=False)
 
             # Perform inner-loop update
