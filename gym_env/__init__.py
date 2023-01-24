@@ -12,6 +12,13 @@ register(
 )
 
 register(
+    id='RICE-PD-v0',
+    entry_point='gym_env.rice.rice:Rice',
+    kwargs={'args': None},
+    max_episode_steps=150
+)
+
+register(
     id='IPD-v0',
     entry_point='gym_env.ipd.ipd_env:IPDEnv',
     kwargs={'args': None},

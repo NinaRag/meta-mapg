@@ -17,14 +17,14 @@ export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so
 # Begin experiment
 python3 main.py \
 --seed 42 \
---config "ccf_pd.yaml" \
+--config "rice_pd.yaml" \
 --opponent-shaping \
 --prefix "" \
 "$@"
 
 python3 main.py \
 --seed 42 \
---config "ccf_pd.yaml" \
+--config "rice_pd.yaml" \
 --opponent-shaping \
 --test-mode \
 --prefix "test" \
